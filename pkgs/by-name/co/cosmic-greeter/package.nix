@@ -9,6 +9,7 @@
 , libxkbcommon
 , linux-pam
 , wayland
+, cage
 }:
 
 rustPlatform.buildRustPackage rec {
@@ -35,7 +36,7 @@ rustPlatform.buildRustPackage rec {
   };
 
   nativeBuildInputs = [ rustPlatform.bindgenHook cmake just pkg-config ];
-  buildInputs = [ libxkbcommon wayland linux-pam ];
+  buildInputs = [ libxkbcommon wayland linux-pam cage ];
 
   dontUseJustBuild = true;
 
