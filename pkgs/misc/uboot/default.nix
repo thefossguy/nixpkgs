@@ -498,6 +498,8 @@ in {
     extraMeta.platforms = ["aarch64-linux"];
     BL31 = "${armTrustedFirmwareRK3588}/bl31.elf";
     ROCKCHIP_TPL = "${rkbin}/bin/rk35/rk3588_ddr_lp4_2112MHz_lp5_2736MHz_v1.12.bin";
+    # of the RK3588/RK3588s based SBCs
+    # so far, only the Rock 5 Model B has 'CONFIG_ROCKCHIP_SPI_IMAGE' set to 'y'
     filesToInstall = [ "u-boot.itb" "idbloader.img" "u-boot-rockchip.bin" "u-boot-rockchip-spi.bin" ];
   };
 
