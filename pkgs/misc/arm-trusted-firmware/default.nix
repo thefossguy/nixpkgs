@@ -28,12 +28,16 @@ let
     pname = "arm-trusted-firmware${lib.optionalString (platform != null) "-${platform}"}";
     version = "2.10.0";
 
-    src = fetchFromGitHub {
-      owner = "ARM-software";
-      repo = "arm-trusted-firmware";
-      rev = "v${version}";
-      hash = "sha256-CAuftVST9Fje/DWaaoX0K2SfWwlGMaUFG4huuwsTOSU=";
-    };
+    src = if platform == "rk3588" then (
+      fetchTarball "https://gitlab.collabora.com/hardware-enablement/rockchip-3588/trusted-firmware-a/-/archive/rk3588/trusted-firmware-a-rk3588.tar.gz?002d8e85ce5f4f06ebc2c2c52b4923a514bfa701"
+    ) else (
+      fetchFromGitHub {
+        owner = "ARM-software";
+        repo = "arm-trusted-firmware";
+        rev = "v${version}";
+        hash = "sha256-CAuftVST9Fje/DWaaoX0K2SfWwlGMaUFG4huuwsTOSU=";
+      }
+    );
 
     patches = lib.optionals deleteHDCPBlobBeforeBuild [
       # this is a rebased version of https://gitlab.com/vicencb/kevinboot/-/blob/master/atf.patch
@@ -146,6 +150,14 @@ in {
   armTrustedFirmwareRK3399 = buildArmTrustedFirmware rec {
     extraMakeFlags = [ "bl31" ];
     platform = "rk3399";
+    extraMeta.platforms = ["aarch64-linux"];
+    filesToInstall = [ "build/${platform}/release/bl31/bl31.elf"];
+    platformCanUseHDCPBlob = true;
+  };
+
+  armTrustedFirmwareRK3588 = buildArmTrustedFirmware rec {
+    extraMakeFlags = [ "bl31" ];
+    platform = "rk3588";
     extraMeta.platforms = ["aarch64-linux"];
     filesToInstall = [ "build/${platform}/release/bl31/bl31.elf"];
     platformCanUseHDCPBlob = true;

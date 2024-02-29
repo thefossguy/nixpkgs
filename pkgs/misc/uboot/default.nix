@@ -21,15 +21,16 @@
 , armTrustedFirmwareAllwinnerH616
 , armTrustedFirmwareRK3328
 , armTrustedFirmwareRK3399
+, armTrustedFirmwareRK3588
 , armTrustedFirmwareS905
 , buildPackages
 }:
 
 let
-  defaultVersion = "2023.07.02";
+  defaultVersion = "2024.01";
   defaultSrc = fetchurl {
     url = "https://ftp.denx.de/pub/u-boot/u-boot-${defaultVersion}.tar.bz2";
-    hash = "sha256-a2pIWBwUq7D5W9h8GvTXQJIkBte4AQAqn5Ryf93gIdU=";
+    hash = "sha256-uZYR8e0je/NUG9yENLaMlqbgWWcGH5kkQ8swqr6+9bM=";
   };
 
   # Dependencies for the tools need to be included as either native or cross,
@@ -60,9 +61,9 @@ let
 
     src = if src == null then defaultSrc else src;
 
-    patches = [
-      ./0001-configs-rpi-allow-for-bigger-kernels.patch
-    ] ++ extraPatches;
+    #patches = [
+    #  ./0001-configs-rpi-allow-for-bigger-kernels.patch
+    #] ++ extraPatches;
 
     postPatch = ''
       ${lib.concatMapStrings (script: ''
@@ -442,6 +443,55 @@ in {
     extraMeta.platforms = ["aarch64-linux"];
     BL31 = "${armTrustedFirmwareRK3399}/bl31.elf";
     filesToInstall = [ "u-boot.itb" "idbloader.img"];
+  };
+
+  ubootNanoPCT6 = buildUBoot {
+    defconfig = "nanopc-t6-rk3588_defconfig";
+    extraMeta.platforms = ["aarch64-linux"];
+    BL31 = "${armTrustedFirmwareRK3588}/bl31.elf";
+    filesToInstall = [ "u-boot.itb" "idbloader.img" "u-boot-rockchip.bin" ];
+  };
+
+  ubootQuartzPro64 = buildUBoot {
+    defconfig = "quartzpro64-rk3588_defconfig";
+    extraMeta.platforms = ["aarch64-linux"];
+    BL31 = "${armTrustedFirmwareRK3588}/bl31.elf";
+    filesToInstall = [ "u-boot.itb" "idbloader.img" "u-boot-rockchip.bin" ];
+  };
+
+  ubootRock5A = buildUBoot {
+    defconfig = "rock5a-rk3588s_defconfig";
+    extraMeta.platforms = ["aarch64-linux"];
+    BL31 = "${armTrustedFirmwareRK3588}/bl31.elf";
+    filesToInstall = [ "u-boot.itb" "idbloader.img" "u-boot-rockchip.bin" ];
+  };
+
+  ubootTuringRK1 = buildUBoot {
+    defconfig = "turing-rk1-rk3588_defconfig";
+    extraMeta.platforms = ["aarch64-linux"];
+    BL31 = "${armTrustedFirmwareRK3588}/bl31.elf";
+    filesToInstall = [ "u-boot.itb" "idbloader.img" "u-boot-rockchip.bin" ];
+  };
+
+  ubootOrangePi5Plus = buildUBoot {
+    defconfig = "orangepi-5-plus-rk3588_defconfig";
+    extraMeta.platforms = ["aarch64-linux"];
+    BL31 = "${armTrustedFirmwareRK3588}/bl31.elf";
+    filesToInstall = [ "u-boot.itb" "idbloader.img" "u-boot-rockchip.bin" ];
+  };
+
+  ubootOrangePi5 = buildUBoot {
+    defconfig = "orangepi-5-rk3588s_defconfig";
+    extraMeta.platforms = ["aarch64-linux"];
+    BL31 = "${armTrustedFirmwareRK3588}/bl31.elf";
+    filesToInstall = [ "u-boot.itb" "idbloader.img" "u-boot-rockchip.bin" ];
+  };
+
+  ubootRock5B = buildUBoot {
+    defconfig = "rock5b-rk3588_defconfig";
+    extraMeta.platforms = ["aarch64-linux"];
+    BL31 = "${armTrustedFirmwareRK3588}/bl31.elf";
+    filesToInstall = [ "u-boot.itb" "idbloader.img" "u-boot-rockchip.bin" "u-boot-rockchip-spi.bin" ];
   };
 
   ubootQemuAarch64 = buildUBoot {

@@ -27376,6 +27376,7 @@ with pkgs;
     armTrustedFirmwareRK3328
     armTrustedFirmwareRK3399
     armTrustedFirmwareS905
+    armTrustedFirmwareRK3588
     ;
 
   mlxbf-bootimages = callPackage ../misc/mlxbf-bootimages { };
@@ -28598,6 +28599,13 @@ with pkgs;
     ubootPinebook
     ubootPinebookPro
     ubootQemuAarch64
+    ubootNanoPCT6
+    ubootQuartzPro64
+    ubootRock5A
+    ubootTuringRK1
+    ubootOrangePi5Plus
+    ubootOrangePi5
+    ubootRock5B
     ubootQemuArm
     ubootQemuRiscv64Smode
     ubootQemuX86
