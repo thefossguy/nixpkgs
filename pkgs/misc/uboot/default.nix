@@ -23,6 +23,7 @@
 , armTrustedFirmwareRK3399
 , armTrustedFirmwareRK3588
 , armTrustedFirmwareS905
+, rkbin
 , buildPackages
 }:
 
@@ -78,7 +79,6 @@ let
       ncurses # tools/kwboot
       bc
       bison
-      dtc
       flex
       installShellFiles
       (buildPackages.python3.withPackages (p: [
@@ -97,7 +97,7 @@ let
     enableParallelBuilding = true;
 
     makeFlags = [
-      "DTC=dtc"
+      "DTC=${lib.getExe buildPackages.dtc}"
       "CROSS_COMPILE=${stdenv.cc.targetPrefix}"
     ] ++ extraMakeFlags;
 
@@ -449,6 +449,7 @@ in {
     defconfig = "nanopc-t6-rk3588_defconfig";
     extraMeta.platforms = ["aarch64-linux"];
     BL31 = "${armTrustedFirmwareRK3588}/bl31.elf";
+    ROCKCHIP_TPL = "${rkbin}/bin/rk35/rk3588_ddr_lp4_2112MHz_lp5_2736MHz_v1.12.bin";
     filesToInstall = [ "u-boot.itb" "idbloader.img" "u-boot-rockchip.bin" ];
   };
 
@@ -456,6 +457,7 @@ in {
     defconfig = "quartzpro64-rk3588_defconfig";
     extraMeta.platforms = ["aarch64-linux"];
     BL31 = "${armTrustedFirmwareRK3588}/bl31.elf";
+    ROCKCHIP_TPL = "${rkbin}/bin/rk35/rk3588_ddr_lp4_2112MHz_lp5_2736MHz_v1.12.bin";
     filesToInstall = [ "u-boot.itb" "idbloader.img" "u-boot-rockchip.bin" ];
   };
 
@@ -463,6 +465,7 @@ in {
     defconfig = "rock5a-rk3588s_defconfig";
     extraMeta.platforms = ["aarch64-linux"];
     BL31 = "${armTrustedFirmwareRK3588}/bl31.elf";
+    ROCKCHIP_TPL = "${rkbin}/bin/rk35/rk3588_ddr_lp4_2112MHz_lp5_2736MHz_v1.12.bin";
     filesToInstall = [ "u-boot.itb" "idbloader.img" "u-boot-rockchip.bin" ];
   };
 
@@ -470,6 +473,7 @@ in {
     defconfig = "turing-rk1-rk3588_defconfig";
     extraMeta.platforms = ["aarch64-linux"];
     BL31 = "${armTrustedFirmwareRK3588}/bl31.elf";
+    ROCKCHIP_TPL = "${rkbin}/bin/rk35/rk3588_ddr_lp4_2112MHz_lp5_2736MHz_v1.12.bin";
     filesToInstall = [ "u-boot.itb" "idbloader.img" "u-boot-rockchip.bin" ];
   };
 
@@ -477,6 +481,7 @@ in {
     defconfig = "orangepi-5-plus-rk3588_defconfig";
     extraMeta.platforms = ["aarch64-linux"];
     BL31 = "${armTrustedFirmwareRK3588}/bl31.elf";
+    ROCKCHIP_TPL = "${rkbin}/bin/rk35/rk3588_ddr_lp4_2112MHz_lp5_2736MHz_v1.12.bin";
     filesToInstall = [ "u-boot.itb" "idbloader.img" "u-boot-rockchip.bin" ];
   };
 
@@ -484,6 +489,7 @@ in {
     defconfig = "orangepi-5-rk3588s_defconfig";
     extraMeta.platforms = ["aarch64-linux"];
     BL31 = "${armTrustedFirmwareRK3588}/bl31.elf";
+    ROCKCHIP_TPL = "${rkbin}/bin/rk35/rk3588_ddr_lp4_2112MHz_lp5_2736MHz_v1.12.bin";
     filesToInstall = [ "u-boot.itb" "idbloader.img" "u-boot-rockchip.bin" ];
   };
 
@@ -491,6 +497,7 @@ in {
     defconfig = "rock5b-rk3588_defconfig";
     extraMeta.platforms = ["aarch64-linux"];
     BL31 = "${armTrustedFirmwareRK3588}/bl31.elf";
+    ROCKCHIP_TPL = "${rkbin}/bin/rk35/rk3588_ddr_lp4_2112MHz_lp5_2736MHz_v1.12.bin";
     filesToInstall = [ "u-boot.itb" "idbloader.img" "u-boot-rockchip.bin" "u-boot-rockchip-spi.bin" ];
   };
 
