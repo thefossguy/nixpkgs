@@ -28567,8 +28567,6 @@ with pkgs;
 
   twingate = callPackage ../applications/networking/twingate { };
 
-  rkbin = callPackage ../misc/rkbin { };
-
   # Upstream U-Boots:
   inherit (callPackage ../misc/uboot {})
     buildUBoot

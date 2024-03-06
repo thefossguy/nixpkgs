@@ -22,6 +22,10 @@ stdenv.mkDerivation rec {
     mv bin doc $out/
   '';
 
+  dontConfigure = true;
+  dontBuild = true;
+  dontFixup = true;
+
   meta = with lib; {
     description = "Rockchip proprietary bootloader blobs";
     homepage = "https://github.com/rockchip-linux/rkbin";
