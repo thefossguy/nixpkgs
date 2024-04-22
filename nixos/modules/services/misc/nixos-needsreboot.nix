@@ -10,6 +10,11 @@ in
   };
 
   config = lib.mkIf cfg.enable {
+    assertions = [{
+      assertion = config.system.autoUpgrade.enable == true;
+      message  = "Please enable 'system.autoUpgrade'.";
+    }];
+
     systemd.services.nixos-needsreboot = {
       description = "Determine if you need to reboot your NixOS machine";
       requires = [ "nixos-upgrade.service" ];
