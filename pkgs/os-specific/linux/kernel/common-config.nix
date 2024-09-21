@@ -496,6 +496,13 @@ let
     rust = lib.optionalAttrs ((features.rust or false) && lib.versionAtLeast version "6.7") {
       RUST = yes;
       GCC_PLUGINS = no;
+
+      # Usually, these are configured correctly when the `defconfig` passed to `buildLinux` is really "defconfig" but
+      # if someone as insane as me sets it to "allmodconfig", the build fails and the following overrides only come
+      # in the picture when the "allmodconfig" is used.
+      MAXSMP = no;
+      SLUB_TINY = no;
+      MODVERSIONS = no;
     };
 
     sound = {
