@@ -113,6 +113,7 @@ let
 
       isModular = config.isYes "MODULES";
       withRust = config.isYes "RUST";
+      rustAnalyzerOutput = lib.mkIf withRust ",rust-project.json"; # copy the 'rust-project.json' if the Kernel is built with Rust support enabled
 
       buildDTBs = kernelConf.DTB or false;
 
@@ -248,8 +249,9 @@ let
         "KBUILD_BUILD_VERSION=1-NixOS"
         kernelConf.target
         "vmlinux"  # for "perf" and things like that
-      ] ++ optional isModular "modules"
+      ] ++ optionals isModular ["modules"]
         ++ optionals buildDTBs ["dtbs" "DTC_FLAGS=-@"]
+        ++ optionals withRust  ["rust-analyzer"]
       ++ extraMakeFlags;
 
       installFlags = [
@@ -341,7 +343,7 @@ let
 
         cd $dev/lib/modules/${modDirVersion}/source
 
-        cp $buildRoot/{.config,Module.symvers} $dev/lib/modules/${modDirVersion}/build
+        cp $buildRoot/{.config,Module.symvers${rustAnalyzerOutput}} $dev/lib/modules/${modDirVersion}/build
         make modules_prepare $makeFlags "''${makeFlagsArray[@]}" O=$dev/lib/modules/${modDirVersion}/build
 
         # For reproducibility, removes accidental leftovers from a `cc1` call
