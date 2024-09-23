@@ -113,7 +113,7 @@ let
 
       isModular = config.isYes "MODULES";
       withRust = config.isYes "RUST";
-      rustAnalyzerOutput = lib.mkIf withRust ",rust-project.json"; # copy the 'rust-project.json' if the Kernel is built with Rust support enabled
+      rustAnalyzerOutput = if withRust then ",rust-project.json" else ""; # copy the 'rust-project.json' if the Kernel is built with Rust support enabled
 
       buildDTBs = kernelConf.DTB or false;
 
