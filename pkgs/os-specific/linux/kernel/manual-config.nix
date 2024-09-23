@@ -113,7 +113,7 @@ let
 
       isModular = config.isYes "MODULES";
       withRust = config.isYes "RUST";
-      rustAnalyzerOutput = if withRust then ",rust-project.json" else ""; # copy the 'rust-project.json' if the Kernel is built with Rust support enabled
+      rustAnalyzerTarget = if withRust then "rust-analyzer" else ""; # builds the `rust-analyzer` target if the Kernel is built with Rust support
 
       buildDTBs = kernelConf.DTB or false;
 
@@ -251,7 +251,6 @@ let
         "vmlinux"  # for "perf" and things like that
       ] ++ optionals isModular ["modules"]
         ++ optionals buildDTBs ["dtbs" "DTC_FLAGS=-@"]
-        ++ optionals withRust  ["rust-analyzer"]
       ++ extraMakeFlags;
 
       installFlags = [
@@ -343,8 +342,8 @@ let
 
         cd $dev/lib/modules/${modDirVersion}/source
 
-        cp $buildRoot/{.config,Module.symvers${rustAnalyzerOutput}} $dev/lib/modules/${modDirVersion}/build
-        make modules_prepare $makeFlags "''${makeFlagsArray[@]}" O=$dev/lib/modules/${modDirVersion}/build
+        cp $buildRoot/{.config,Module.symvers} $dev/lib/modules/${modDirVersion}/build
+        make modules_prepare ${rustAnalyzerTarget} $makeFlags "''${makeFlagsArray[@]}" O=$dev/lib/modules/${modDirVersion}/build
 
         # For reproducibility, removes accidental leftovers from a `cc1` call
         # from a `try-run` call from the Makefile
