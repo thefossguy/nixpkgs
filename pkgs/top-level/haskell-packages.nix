@@ -280,6 +280,8 @@ in {
           bb.packages.ghc928
         else if stdenv.buildPlatform.isPower64 && stdenv.buildPlatform.isLittleEndian then
           bb.packages.ghc928
+        else if stdenv.buildPlatform.isRiscV64 && stdenv.buildPlatform.isLittleEndian then
+          bb.packages.ghc948
         else
           bb.packages.ghc924Binary;
       inherit (buildPackages.python3Packages) sphinx;
@@ -298,6 +300,8 @@ in {
           bb.packages.ghc928
         else if stdenv.buildPlatform.isPower64 && stdenv.buildPlatform.isLittleEndian then
           bb.packages.ghc928
+        else if stdenv.buildPlatform.isRiscV64 && stdenv.buildPlatform.isLittleEndian then
+          bb.packages.ghc948
         else
           bb.packages.ghc924Binary;
       inherit (buildPackages.python3Packages) sphinx;
@@ -316,6 +320,8 @@ in {
           bb.packages.ghc928
         else if stdenv.buildPlatform.isPower64 && stdenv.buildPlatform.isLittleEndian then
           bb.packages.ghc928
+        else if stdenv.buildPlatform.isRiscV64 && stdenv.buildPlatform.isLittleEndian then
+          bb.packages.ghc948
         else
           bb.packages.ghc924Binary;
       inherit (buildPackages.python3Packages) sphinx;
@@ -334,6 +340,8 @@ in {
           bb.packages.ghc928
         else if stdenv.buildPlatform.isPower64 && stdenv.buildPlatform.isLittleEndian then
           bb.packages.ghc928
+        else if stdenv.buildPlatform.isRiscV64 && stdenv.buildPlatform.isLittleEndian then
+          bb.packages.ghc948
         else
           bb.packages.ghc924Binary;
       inherit (buildPackages.python3Packages) sphinx;
