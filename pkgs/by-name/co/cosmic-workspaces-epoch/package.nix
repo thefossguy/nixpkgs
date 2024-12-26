@@ -1,37 +1,37 @@
 {
-  lib,
-  rustPlatform,
   fetchFromGitHub,
-  pkg-config,
-  libxkbcommon,
+  lib,
+  libcosmicAppHook,
   libinput,
-  libglvnd,
   mesa,
+  nix-update-script,
+  pkg-config,
+  rustPlatform,
   udev,
   wayland,
 }:
 
-rustPlatform.buildRustPackage rec {
+rustPlatform.buildRustPackage {
   pname = "cosmic-workspaces-epoch";
-  version = "1.0.0-alpha.2";
+  version = "epoch-1.0.0-alpha.2";
 
   src = fetchFromGitHub {
     owner = "pop-os";
     repo = "cosmic-workspaces-epoch";
-    rev = "epoch-${version}";
+    rev = "refs/tags/epoch-1.0.0-alpha.2";
     hash = "sha256-z3xQ6Vgqkm8hYLo2550NbFRkTMRQ0F9zn85iobnykH5=";
   };
 
   useFetchCargoVendor = true;
   cargoHash = "sha256-QRBgFTXPWQ0RCSfCA2WpBs+vKTFD7Xfz60cIDtbYb5Y=";
 
-  separateDebugInfo = true;
+  nativeBuildInputs = [
+    libcosmicAppHook
+    pkg-config
+  ];
 
-  nativeBuildInputs = [ pkg-config ];
   buildInputs = [
-    libxkbcommon
     libinput
-    libglvnd
     mesa
     udev
     wayland
@@ -43,22 +43,22 @@ rustPlatform.buildRustPackage rec {
     cp data/*.svg $out/share/icons/hicolor/scalable/apps/
   '';
 
-  # Force linking to libEGL, which is always dlopen()ed, and to
-  # libwayland-client, which is always dlopen()ed except by the
-  # obscure winit backend.
-  RUSTFLAGS = map (a: "-C link-arg=${a}") [
-    "-Wl,--push-state,--no-as-needed"
-    "-lEGL"
-    "-lwayland-client"
-    "-Wl,--pop-state"
-  ];
+  passthru.updateScript = nix-update-script {
+    extraArgs = [
+      "--version-regex"
+      "epoch-(.*)"
+    ];
+  };
 
   meta = with lib; {
     homepage = "https://github.com/pop-os/cosmic-workspaces-epoch";
     description = "Workspaces Epoch for the COSMIC Desktop Environment";
     mainProgram = "cosmic-workspaces";
     license = licenses.gpl3Only;
-    maintainers = with maintainers; [ nyabinary ];
+    maintainers = with maintainers; [
+      nyabinary
+      thefossguy
+    ];
     platforms = platforms.linux;
   };
 }
