@@ -1,29 +1,26 @@
 {
-  lib,
-  rustPlatform,
   fetchFromGitHub,
   gst_all_1,
+  lib,
+  libcosmicAppHook,
   mesa,
-  pkg-config,
-  libglvnd,
-  libxkbcommon,
+  nix-update-script,
   pipewire,
+  pkg-config,
+  rustPlatform,
   wayland,
 }:
 
 rustPlatform.buildRustPackage rec {
   pname = "xdg-desktop-portal-cosmic";
-  version = "1.0.0-alpha.4";
+  version = "epoch-1.0.0-alpha.4";
 
   src = fetchFromGitHub {
     owner = "pop-os";
     repo = "xdg-desktop-portal-cosmic";
-    rev = "epoch-${version}";
+    rev = "refs/tags/epoch-1.0.0-alpha.4";
     hash = "sha256-4FdgavjxRKbU5/WBw9lcpWYLxCH6IJr7LaGkEXYUGbw=";
   };
-
-  env.VERGEN_GIT_COMMIT_DATE = "2024-10-10";
-  env.VERGEN_GIT_SHA = src.rev;
 
   useFetchCargoVendor = true;
   cargoHash = "sha256-FgfUkU9sv5mq4+pou2myQn6+DkLzPacjUhQ4pL8hntM=";
@@ -31,27 +28,19 @@ rustPlatform.buildRustPackage rec {
   separateDebugInfo = true;
 
   nativeBuildInputs = [
-    rustPlatform.bindgenHook
+    libcosmicAppHook
     pkg-config
+    rustPlatform.bindgenHook
   ];
+
   buildInputs = [
-    libglvnd
-    libxkbcommon
     mesa
     pipewire
     wayland
   ];
   checkInputs = [ gst_all_1.gstreamer ];
 
-  # Force linking to libEGL, which is always dlopen()ed, and to
-  # libwayland-client, which is always dlopen()ed except by the
-  # obscure winit backend.
-  RUSTFLAGS = map (a: "-C link-arg=${a}") [
-    "-Wl,--push-state,--no-as-needed"
-    "-lEGL"
-    "-lwayland-client"
-    "-Wl,--pop-state"
-  ];
+  env.VERGEN_GIT_SHA = src.rev;
 
   postInstall = ''
     mkdir -p $out/share/{dbus-1/services,icons,xdg-desktop-portal/portals}
@@ -61,11 +50,21 @@ rustPlatform.buildRustPackage rec {
     cp data/cosmic.portal $out/share/xdg-desktop-portal/portals/
   '';
 
+  passthru.updateScript = nix-update-script {
+    extraArgs = [
+      "--version-regex"
+      "epoch-(.*)"
+    ];
+  };
+
   meta = with lib; {
     homepage = "https://github.com/pop-os/xdg-desktop-portal-cosmic";
     description = "XDG Desktop Portal for the COSMIC Desktop Environment";
     license = licenses.gpl3Only;
-    maintainers = with maintainers; [ nyabinary ];
+    maintainers = with maintainers; [
+      nyabinary
+      thefossguy
+    ];
     mainProgram = "xdg-desktop-portal-cosmic";
     platforms = platforms.linux;
   };
