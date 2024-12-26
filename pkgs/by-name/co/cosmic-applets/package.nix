@@ -1,28 +1,30 @@
 {
-  lib,
-  stdenv,
-  fetchFromGitHub,
-  rustPlatform,
-  just,
-  pkg-config,
-  udev,
-  util-linuxMinimal,
   dbus,
+  fetchFromGitHub,
   glib,
+  just,
+  lib,
+  libcosmicAppHook,
   libinput,
-  libxkbcommon,
+  nix-update-script,
+  pkg-config,
   pulseaudio,
+  rustPlatform,
+  stdenv,
+  udev,
+  util-linux,
   wayland,
+  xkeyboard_config,
 }:
 
-rustPlatform.buildRustPackage rec {
+rustPlatform.buildRustPackage {
   pname = "cosmic-applets";
-  version = "1.0.0-alpha.1";
+  version = "epoch-1.0.0-alpha.1";
 
   src = fetchFromGitHub {
     owner = "pop-os";
     repo = "cosmic-applets";
-    rev = "epoch-${version}";
+    rev = "refs/tags/epoch-1.0.0-alpha.1";
     hash = "sha256-4KaMG7sKaiJDIlP101/6YDHDwKRqJXHdqotNZlPhv8Q=";
   };
 
@@ -31,20 +33,22 @@ rustPlatform.buildRustPackage rec {
 
   nativeBuildInputs = [
     just
+    libcosmicAppHook
     pkg-config
-    util-linuxMinimal
+    util-linux
   ];
+
   buildInputs = [
     dbus
     glib
     libinput
-    libxkbcommon
     pulseaudio
-    wayland
     udev
+    wayland
   ];
 
   dontUseJustBuild = true;
+  dontUseJustCheck = true;
 
   justFlags = [
     "--set"
@@ -55,22 +59,26 @@ rustPlatform.buildRustPackage rec {
     "${stdenv.hostPlatform.rust.cargoShortTarget}/release"
   ];
 
-  # Force linking to libwayland-client, which is always dlopen()ed.
-  "CARGO_TARGET_${stdenv.hostPlatform.rust.cargoEnvVarTarget}_RUSTFLAGS" =
-    map (a: "-C link-arg=${a}")
-      [
-        "-Wl,--push-state,--no-as-needed"
-        "-lwayland-client"
-        "-Wl,--pop-state"
-      ];
+  postInstall = ''
+    libcosmicAppWrapperArgs+=(--set-default X11_BASE_RULES_XML ${xkeyboard_config}/share/X11/xkb/rules/base.xml)
+    libcosmicAppWrapperArgs+=(--set-default X11_EXTRA_RULES_XML ${xkeyboard_config}/share/X11/xkb/rules/base.extras.xml)
+  '';
+
+  passthru.updateScript = nix-update-script {
+    extraArgs = [
+      "--version-regex"
+      "epoch-(.*)"
+    ];
+  };
 
   meta = with lib; {
     homepage = "https://github.com/pop-os/cosmic-applets";
     description = "Applets for the COSMIC Desktop Environment";
     license = licenses.gpl3Only;
     maintainers = with maintainers; [
-      qyliss
       nyabinary
+      qyliss
+      thefossguy
     ];
     platforms = platforms.linux;
   };
