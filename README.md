@@ -1,101 +1,36 @@
-<p align="center">
-  <a href="https://nixos.org">
-    <picture>
-      <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/NixOS/nixos-homepage/main/public/logo/nixos-hires.png">
-      <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/NixOS/nixos-artwork/master/logo/nixos-white.png">
-      <img src="https://raw.githubusercontent.com/NixOS/nixos-homepage/main/public/logo/nixos-hires.png" width="500px" alt="NixOS logo">
-    </picture>
-  </a>
-</p>
+# README
 
-<p align="center">
-  <a href="CONTRIBUTING.md"><img src="https://img.shields.io/github/contributors-anon/NixOS/nixpkgs" alt="Contributors badge" /></a>
-  <a href="https://opencollective.com/nixos"><img src="https://opencollective.com/nixos/tiers/supporter/badge.svg?label=supporters&color=brightgreen" alt="Open Collective supporters" /></a>
-</p>
+This branch will be maintained to keep up with nixpkgs with the sole purpose
+to maintain a simple, out-of-tree patch to enable ARM64 Linux kernel with the
+pagesize of 16KB.
 
-[Nixpkgs](https://github.com/nixos/nixpkgs) is a collection of over
-100,000 software packages that can be installed with the
-[Nix](https://nixos.org/nix/) package manager. It also implements
-[NixOS](https://nixos.org/nixos/), a purely-functional Linux distribution.
+The author is doing this to improve Apple Silicon support in nixpkgs and
+a 16KB pagesize is a hardware requirement. It also benefits owners of SBC
+that can take advantage of this, like the A76 cores found in the
+Raspberry Pi 5 and other RK3588-SoC based boards.
 
-# Manuals
+You can either use this branch as your nixpkgs (is a patched mirror of the
+**`master`** branch) input or you can do the following and keep using the
+upstream nixpkgs source.
+```nix
+# **ONLY MAINTAINED FOR `linux_latest` AND `linux_testing`**
+kernelPackages = lib.mkForce (pkgs.linuxPackagesFor (pkgs.linux_latest.override {
+  argsOverride = {
+    structuredExtraConfig = ; {
+      ARM64_16K_PAGES = lib.kernel.yes;
+    };
+  };
+}));
 
-* [NixOS Manual](https://nixos.org/nixos/manual) - how to install, configure, and maintain a purely-functional Linux distribution
-* [Nixpkgs Manual](https://nixos.org/nixpkgs/manual/) - contributing to Nixpkgs and using programming-language-specific Nix expressions
-* [Nix Package Manager Manual](https://nixos.org/nix/manual) - how to write Nix expressions (programs), and how to use Nix command line tools
+```
 
-# Community
+If you are on a slow machine but would still like to participate in possible
+bug hunting, please employ the following binary cache. I will try to keep it
+up-to-date.
 
-* [Discourse Forum](https://discourse.nixos.org/)
-* [Matrix Chat](https://matrix.to/#/#community:nixos.org)
-* [NixOS Weekly](https://weekly.nixos.org/)
-* [Official wiki](https://wiki.nixos.org/)
-* [Community-maintained list of ways to get in touch](https://wiki.nixos.org/wiki/Get_In_Touch#Chat) (Discord, Telegram, IRC, etc.)
-
-# Other Project Repositories
-
-The sources of all official Nix-related projects are in the [NixOS
-organization on GitHub](https://github.com/NixOS/). Here are some of
-the main ones:
-
-* [Nix](https://github.com/NixOS/nix) - the purely functional package manager
-* [NixOps](https://github.com/NixOS/nixops) - the tool to remotely deploy NixOS machines
-* [nixos-hardware](https://github.com/NixOS/nixos-hardware) - NixOS profiles to optimize settings for different hardware
-* [Nix RFCs](https://github.com/NixOS/rfcs) - the formal process for making substantial changes to the community
-* [NixOS homepage](https://github.com/NixOS/nixos-homepage) - the [NixOS.org](https://nixos.org) website
-* [hydra](https://github.com/NixOS/hydra) - our continuous integration system
-* [NixOS Artwork](https://github.com/NixOS/nixos-artwork) - NixOS artwork
-
-# Continuous Integration and Distribution
-
-Nixpkgs and NixOS are built and tested by our continuous integration
-system, [Hydra](https://hydra.nixos.org/).
-
-* [Continuous package builds for unstable/master](https://hydra.nixos.org/jobset/nixos/trunk-combined)
-* [Continuous package builds for the NixOS 24.11 release](https://hydra.nixos.org/jobset/nixos/release-24.11)
-* [Tests for unstable/master](https://hydra.nixos.org/job/nixos/trunk-combined/tested#tabs-constituents)
-* [Tests for the NixOS 24.11 release](https://hydra.nixos.org/job/nixos/release-24.11/tested#tabs-constituents)
-
-Artifacts successfully built with Hydra are published to cache at
-https://cache.nixos.org/. When successful build and test criteria are
-met, the Nixpkgs expressions are distributed via [Nix
-channels](https://nixos.org/manual/nix/stable/package-management/channels.html).
-
-# Contributing
-
-Nixpkgs is among the most active projects on GitHub. While thousands
-of open issues and pull requests might seem a lot at first, it helps
-consider it in the context of the scope of the project. Nixpkgs
-describes how to build tens of thousands of pieces of software and implements a
-Linux distribution. The [GitHub Insights](https://github.com/NixOS/nixpkgs/pulse)
-page gives a sense of the project activity.
-
-Community contributions are always welcome through GitHub Issues and
-Pull Requests.
-
-For more information about contributing to the project, please visit
-the [contributing page](CONTRIBUTING.md).
-
-# Donations
-
-The infrastructure for NixOS and related projects is maintained by a
-nonprofit organization, the [NixOS
-Foundation](https://nixos.org/nixos/foundation.html). To ensure the
-continuity and expansion of the NixOS infrastructure, we are looking
-for donations to our organization.
-
-You can donate to the NixOS foundation through [SEPA bank
-transfers](https://nixos.org/donate.html) or by using Open Collective:
-
-<a href="https://opencollective.com/nixos#support"><img src="https://opencollective.com/nixos/tiers/supporter.svg?width=890" /></a>
-
-# License
-
-Nixpkgs is licensed under the [MIT License](COPYING).
-
-Note: MIT license does not apply to the packages built by Nixpkgs,
-merely to the files in this repository (the Nix expressions, build
-scripts, NixOS modules, etc.). It also might not apply to patches
-included in Nixpkgs, which may be derivative works of the packages to
-which they apply. The aforementioned artifacts are all covered by the
-licenses of the respective packages.
+```nix
+nix.settings = {
+  extra-substituters = [ "https://thefossguy.cachix.org" ];
+  extra-trusted-public-keys = [ "thefossguy.cachix.org-1:/gMdFQnu+BtfjSYsnxZbtNdA2s4EX3mvNFWkqovpN24=" ];
+};
+```
