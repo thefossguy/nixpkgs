@@ -1368,6 +1368,9 @@ let
         lib.optionalAttrs
           (stdenv.hostPlatform.system == "armv7l-linux" || stdenv.hostPlatform.system == "aarch64-linux")
           {
+            # Enable 16KB pages support
+            ARM64_16K_PAGES = whenAtLeast "6.12" yes;
+
             # Enables support for the Allwinner Display Engine 2.0
             SUN8I_DE2_CCU = yes;
 
