@@ -56,6 +56,7 @@ rustPlatform.buildRustPackage (oldAttrs: {
     maintainers = with maintainers; [
       a-kenji
       nyabinary
+      thefossguy
     ];
     platforms = platforms.linux;
   };
