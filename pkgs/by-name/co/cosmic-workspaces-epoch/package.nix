@@ -11,19 +11,19 @@
   wayland,
 }:
 
-rustPlatform.buildRustPackage rec {
+rustPlatform.buildRustPackage (oldAttrs: {
   pname = "cosmic-workspaces-epoch";
-  version = "1.0.0-alpha.5.1";
+  version = "1.0.0-alpha.6";
 
   src = fetchFromGitHub {
     owner = "pop-os";
-    repo = "cosmic-workspaces-epoch";
-    rev = "epoch-${version}";
-    hash = "sha256-lAK7DZWwNMr30u6Uopew9O/6FIG6e2SgcdA+cD/K5Ok=";
+    repo = oldAttrs.pname;
+    tag = "epoch-${oldAttrs.version}";
+    hash = "sha256-3jivE0EaSddPxMYn9DDaYUMafPf60XeCwVeQegbt++c=";
   };
 
   useFetchCargoVendor = true;
-  cargoHash = "sha256-w1lQdzy2mJ5NfqngvOLqFCxyhWgvIySDDXCCtCCtTjg=";
+  cargoHash = "sha256-l5y9bOG/h24EfiAFfVKjtzYCzjxU2TI8wh6HBUwoVcE=";
 
   separateDebugInfo = true;
 
@@ -61,4 +61,4 @@ rustPlatform.buildRustPackage rec {
     maintainers = with maintainers; [ nyabinary ];
     platforms = platforms.linux;
   };
-}
+})
