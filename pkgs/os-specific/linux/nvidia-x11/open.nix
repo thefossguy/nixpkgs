@@ -7,6 +7,7 @@
   nvidia_x11,
   hash,
   patches ? [ ],
+  useProfiles ? false,
   broken ? false,
 }:
 
