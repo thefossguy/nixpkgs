@@ -459,11 +459,11 @@ in {
 
     # this is not a replacement for nvidia_x11*
     # only the opensource kernel driver exposed for hydra to build
-    nvidia_x11_beta_open         = nvidiaPackages.beta.open;
-    nvidia_x11_latest_open       = nvidiaPackages.latest.open;
-    nvidia_x11_production_open   = nvidiaPackages.production.open;
-    nvidia_x11_stable_open       = nvidiaPackages.stable.open;
-    nvidia_x11_vulkan_beta_open  = nvidiaPackages.vulkan_beta.open;
+    nvidia_x11_beta_open         = nvidiaPackages.beta.open.override { useProfiles = false; };
+    nvidia_x11_latest_open       = nvidiaPackages.latest.open.override { useProfiles = false; };
+    nvidia_x11_production_open   = nvidiaPackages.production.open.override { useProfiles = false; };
+    nvidia_x11_stable_open       = nvidiaPackages.stable.open.override { useProfiles = false; };
+    nvidia_x11_vulkan_beta_open  = nvidiaPackages.vulkan_beta.open.override { useProfiles = false; };
 
     nxp-pn5xx = callPackage ../os-specific/linux/nxp-pn5xx { };
 

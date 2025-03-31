@@ -272,7 +272,6 @@ let
           callPackage ./open.nix {
             inherit hash;
             nvidia_x11 = self;
-            useProfiles = false;
             patches =
               (builtins.map (rewritePatch {
                 from = "kernel";
