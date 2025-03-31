@@ -535,7 +535,7 @@ in
               '';
 
           environment.etc = {
-            "nvidia/nvidia-application-profiles-rc" = lib.mkIf nvidia_x11.useProfiles {
+            "nvidia/nvidia-application-profiles-rc" = lib.mkIf (nvidia_x11.useProfiles or false) {
               source = "${nvidia_x11.bin}/share/nvidia/nvidia-application-profiles-rc";
             };
 
