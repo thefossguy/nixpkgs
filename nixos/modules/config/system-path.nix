@@ -8,8 +8,18 @@
 }:
 let
 
+  requiredPackagesPriority = config.environment.requiredPackagesPriority;
   requiredPackages =
-    map (pkg: lib.setPrio ((pkg.meta.priority or lib.meta.defaultPriority) + 3) pkg)
+    map
+      (
+        pkg:
+        lib.setPrio (
+          if requiredPackagesPriority == null then
+            ((pkg.meta.priority or lib.meta.defaultPriority) + 3)
+          else
+            requiredPackagesPriority
+        ) pkg
+      )
       [
         pkgs.acl
         pkgs.attr
@@ -77,6 +87,20 @@ in
           configuration.  (The latter is the main difference with
           installing them in the default profile,
           {file}`/nix/var/nix/profiles/default`.
+        '';
+      };
+
+      requiredPackagesPriority = lib.mkOption {
+        type = lib.types.nullOr lib.types.int;
+        default = null;
+        description = ''
+          Override for priority of base system packages that are
+          required in a NixOS system.
+
+          The default value of `null` means "no priority override."
+          The priority is inverse of the value, so a lower value (-5)
+          means higher priority and a higher value (5) means lower
+          priority.
         '';
       };
 
