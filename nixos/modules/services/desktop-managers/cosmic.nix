@@ -142,6 +142,7 @@ in
     services.displayManager.sessionPackages = [ pkgs.cosmic-session ];
     services.geoclue2.enable = true;
     services.geoclue2.enableDemoAgent = false;
+    services.geoclue2.agentWhitelist = [ "geoclue-demo-agent" ];
     services.libinput.enable = true;
     services.upower.enable = true;
     # Required for screen locker
