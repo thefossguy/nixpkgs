@@ -9,7 +9,6 @@
 let
 
   requiredPackages =
-    map (pkg: lib.setPrio ((pkg.meta.priority or lib.meta.defaultPriority) + 3) pkg)
       [
         pkgs.acl
         pkgs.attr
