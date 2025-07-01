@@ -176,7 +176,7 @@ in
       name = "system-path";
       paths = config.environment.systemPackages;
       inherit (config.environment) pathsToLink extraOutputsToInstall;
-      ignoreCollisions = true;
+      ignoreCollisions = false;
       # !!! Hacky, should modularise.
       # outputs TODO: note that the tools will often not be linked by default
       postBuild = ''
