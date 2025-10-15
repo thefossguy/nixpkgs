@@ -91,7 +91,7 @@ let
         }
         // systemArgs // {
           localSystem = {
-            system = cfg.hostPlatform;
+            system = cfg.hostPlatform.system;
           };
         }
       )
