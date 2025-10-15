@@ -89,7 +89,11 @@ let
         {
           inherit (cfg) config overlays;
         }
-        // systemArgs
+        // systemArgs // {
+          localSystem = {
+            system = cfg.hostPlatform;
+          };
+        }
       )
     else
       import ../../.. {
