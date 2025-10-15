@@ -14,7 +14,7 @@ in
   # If neither is passed, assume we are building packages on the current
   # (build, in GNU Autotools parlance) platform.
   localSystem ? {
-    system = args.system or builtins.currentSystem;
+    system = builtins.currentSystem or args.system;
   },
 
   # These are needed only because nix's `--arg` command-line logic doesn't work
