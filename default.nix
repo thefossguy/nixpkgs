@@ -1,4 +1,3 @@
-{ system }:
 let
   missingFeatures = map ({ description, ... }: description) (import ./lib/minfeatures.nix).missing;
 in
@@ -31,4 +30,4 @@ if missingFeatures != [ ] then
 
 else
 
-  import ./pkgs/top-level/impure.nix { inherit system; }
+  import ./pkgs/top-level/impure.nix
