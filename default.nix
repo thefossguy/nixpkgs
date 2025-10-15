@@ -1,3 +1,4 @@
+{ system }:
 let
   missingFeatures = map ({ description, ... }: description) (import ./lib/minfeatures.nix).missing;
 in
