@@ -30,4 +30,4 @@ if missingFeatures != [ ] then
 
 else
 
-  import ./pkgs/top-level/impure.nix
+  import ./pkgs/top-level/impure.nix { inherit system; }
