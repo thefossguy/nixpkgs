@@ -88,7 +88,6 @@ let
       import ../../.. (
         {
           inherit (cfg) config overlays;
-          system = cfg.hostPlatform;
         }
         // systemArgs
       )
