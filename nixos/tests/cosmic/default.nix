@@ -9,7 +9,6 @@
 
 let
   user = config.nodes.machine.users.users.alice;
-  root_user = config.nodes.machine.users.users.root;
   root_user_password = "foobar";
   log_file_path = "/home/${user.name}/${testName}";
 in
@@ -60,6 +59,7 @@ in
       # infrastructure.
       jq
       lswt
+
       (pkgs.makeAutostartItem {
         name = "cosmicTest";
         package = (
@@ -85,6 +85,7 @@ in
           }
         );
       })
+
     ];
 
     # So far, all COSMIC tests launch a few GUI applications. In doing

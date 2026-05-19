@@ -54,7 +54,7 @@ def start_ydotool_daemon(cli_args: argparse.Namespace) -> tuple[str, subprocess.
     return ydotool_daemon_socket_path, ydotool_daemon_process
 
 
-def wait_for_cosmic_notification_watcher(cli_args: argparse.Namespace) -> None:
+def wait_for_cosmic_notification_watcher() -> None:
     logging.info("=" * 80)
     logging.info("Waiting for COSMIC notification watcher start")
 
@@ -104,6 +104,8 @@ def perform_polkit_authentication_test(
     )
 
     polkit_popup_deadline = time.monotonic() + 60
+    pop_up_msg = "the pop-up for polkit password authentication"
+    encountered_polkit_authentication_popup = False
     while time.monotonic() < polkit_popup_deadline:
         polkit_popup_check_process = subprocess.run(
             [
@@ -114,7 +116,8 @@ def perform_polkit_authentication_test(
             check=False,
         )
         if polkit_popup_check_process.returncode == 0:
-            logging.info("Noticed pop-up for polkit password auth")
+            encountered_polkit_authentication_popup = True
+            logging.info(f"Noticed {pop_up_msg}")
             if ydotool_daemon_process.poll() == None:
                 ydotool_process = subprocess.run(
                     [
@@ -140,6 +143,9 @@ def perform_polkit_authentication_test(
                 )
             break
         time.sleep(1)
+    if not encountered_polkit_authentication_popup:
+        logging.error(f"Did not notice {pop_up_msg}")
+
 
     polkit_test_process_stdout = ""
     polkit_test_process_stderr = ""
@@ -255,11 +261,12 @@ def main() -> None:
     logging.info(f"Logging to '{cli_args.log_file_path}.log'")
 
     ydotool_daemon_socket_path, ydotool_daemon_process = start_ydotool_daemon(cli_args)
-    wait_for_cosmic_notification_watcher(cli_args)
+    wait_for_cosmic_notification_watcher()
     perform_polkit_authentication_test(
         cli_args, ydotool_daemon_socket_path, ydotool_daemon_process
     )
     perform_gui_application_test(cli_args)
+
     pathlib.Path(f"{cli_args.log_file_path}.done").touch()
 
 
