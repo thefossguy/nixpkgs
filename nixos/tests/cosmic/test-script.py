@@ -121,6 +121,7 @@ def perform_polkit_authentication_test(
             encountered_polkit_authentication_popup = True
             logging.info(f"Noticed {pop_up_msg}")
             if ydotool_daemon_process.poll() == None:
+                time.sleep(30)
                 ydotool_process = subprocess.run(
                     [
                         "env",
