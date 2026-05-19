@@ -127,9 +127,25 @@ in
         ''
     )
     + ''
-
       with subtest("xdg autostart support in cosmic"):
-          machine.wait_for_unit("app-cosmicTest@autostart.service", user="${user.name}", timeout=180)
+          # When checking the status of our `cosmicTest` package with:
+          # `machine.wait_for_unit("app-cosmicTest@autostart.service", user="${user.name}")`
+          # We are immediately greeted with the error:
+          # ```
+          # subtest: xdg autostart support in cosmic
+          # machine: waiting for unit app-cosmicTest@autostart.service with user alice
+          # machine # [   26.497516] cosmic-comp[1352]: [EGL] 0x3008 (BAD_DISPLAY) eglCreateSync: _eglCreateSync
+          # machine # [   26.511706] su[1416]: Successful su for alice by root
+          # machine # [   26.528190] su[1416]: pam_unix(su:session): session opened for user alice(uid=1000) by (uid=0)
+          # machine # Failed to connect to user scope bus via local transport: No such file or directory
+          # machine # [   26.599563] su[1416]: pam_unix(su:session): session closed for user alice
+          # !!! Test "xdg autostart support in cosmic" failed with error: "retrieving systemctl property "ActiveState" for unit "app-cosmicTest@autostart.service" under user "alice" failed with exit code 1"
+          # ```
+          # Meaning, our session is extremely new and the D-Bus user
+          # session socket does not yet exist. Instead, lets poll for
+          # the log file that the test is guaranteed to write to, as
+          # soon as it starts.
+          machine.wait_for_file("${log_file_path}.log", timeout=120)
 
       exit_code = 0
       try:
