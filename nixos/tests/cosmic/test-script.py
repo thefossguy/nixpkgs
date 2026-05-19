@@ -1,19 +1,60 @@
 #!/usr/bin/env python3
+import argparse
 import logging
 import os
 import pathlib
 import subprocess
-import sys
 import time
 
 
-log_file_path = sys.argv[1]
-if log_file_path.endswith(".log"):
-    log_file_path = log_file_path[:-4]
-log_file_name = f"{log_file_path}.log"
+def parse_cli_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--cosmic-reader-pdf",
+        required=True,
+        type=str,
+        help="The PDF that the `cosmic-reader` should open for testing",
+    )
+    parser.add_argument(
+        "--log-file-path",
+        required=True,
+        type=str,
+        help="The path to the log file (without the '.log' suffix/extension)",
+    )
+    parser.add_argument(
+        "--polkit-agent-helper-path",
+        required=True,
+        type=str,
+        help="The path to the polkit agent helper (`${pkgs.polkit.out}/lib/polkit-1/polkit-agent-helper-1`)",
+    )
+    parser.add_argument(
+        "--root-user-password", required=True, type=str, help="The root user's password"
+    )
+    parser.add_argument(
+        "--ydotool-bin-path",
+        required=True,
+        type=str,
+        help="The path to the ydotool derivation's bin directory (`${pkgs.ydotool}/bin`)",
+    )
+    args = parser.parse_args()
+    return args
 
 
-def wait_for_cosmic_notification_watcher() -> None:
+def start_ydotool_daemon(cli_args: argparse.Namespace) -> tuple[str, subprocess.Popen]:
+    xdg_runtime_dir = os.getenv("XDG_RUNTIME_DIR") or f"/run/user/{os.getuid()}"
+    ydotool_daemon_socket_path = f"{xdg_runtime_dir}/.ydotool_socket"
+    ydotool_daemon_process = subprocess.Popen(
+        [
+            f"{cli_args.ydotool_bin_path}/ydotoold",
+            "--socket-path",
+            ydotool_daemon_socket_path,
+            "--mouse-off",
+        ]
+    )
+    return ydotool_daemon_socket_path, ydotool_daemon_process
+
+
+def wait_for_cosmic_notification_watcher(cli_args: argparse.Namespace) -> None:
     logging.info("=" * 80)
     logging.info("Waiting for COSMIC notification watcher start")
 
@@ -21,9 +62,7 @@ def wait_for_cosmic_notification_watcher() -> None:
     notification_watcher_exists = False
     while time.monotonic() < notification_watcher_wait_deadline:
         busctl_process = subprocess.run(
-            [
-                "busctl", "--user", "status", "com.system76.CosmicStatusNotifierWatcher"
-            ],
+            ["busctl", "--user", "status", "com.system76.CosmicStatusNotifierWatcher"],
             check=False,
             stdout=subprocess.DEVNULL,
             stderr=subprocess.DEVNULL,
@@ -40,7 +79,11 @@ def wait_for_cosmic_notification_watcher() -> None:
         logging.error(f"{notification_watcher_msg} failed")
 
 
-def perform_polkit_authentication_test() -> None:
+def perform_polkit_authentication_test(
+    cli_args: argparse.Namespace,
+    ydotool_daemon_socket_path: str,
+    ydotool_daemon_process: subprocess.Popen,
+) -> None:
     logging.info("=" * 80)
     logging.info("Performing polkit authentication test")
 
@@ -66,12 +109,35 @@ def perform_polkit_authentication_test() -> None:
             [
                 "pgrep",
                 "-afx",
-                f"{os.getenv('POLKIT_AGENT_HELPER_PATH')} --socket-activated",
+                f"{cli_args.polkit_agent_helper_path} --socket-activated",
             ],
             check=False,
         )
         if polkit_popup_check_process.returncode == 0:
-            pathlib.Path(f"{log_file_path}.pkexec_started").touch()
+            logging.info("Noticed pop-up for polkit password auth")
+            if ydotool_daemon_process.poll() == None:
+                ydotool_process = subprocess.run(
+                    [
+                        "env",
+                        f"YDOTOOL_SOCKET={ydotool_daemon_socket_path}",
+                        f"{cli_args.ydotool_bin_path}/ydotool",
+                        "type",
+                        "--key-delay=500",
+                        f"{cli_args.root_user_password}\n",
+                    ],
+                    check=False,
+                )
+                ydotool_msg = (
+                    "the root user's password in the pop-up for polkit authentication"
+                )
+                if ydotool_process.returncode == 0:
+                    logging.info(f"ydotool typed {ydotool_msg}")
+                else:
+                    logging.error(f"ydtool did not type {ydotool_msg}")
+            else:
+                logging.error(
+                    "The ydotool daemon exited for some reason before it could be used"
+                )
             break
         time.sleep(1)
 
@@ -102,7 +168,7 @@ def perform_polkit_authentication_test() -> None:
         logging.error("The polkit authentication test failed")
 
 
-def perform_gui_application_test() -> None:
+def perform_gui_application_test(cli_args: argparse.Namespace) -> None:
     logging.info("=" * 80)
     logging.info("Performing test to launch GUI applications")
 
@@ -118,7 +184,7 @@ def perform_gui_application_test() -> None:
         ],
         "com.system76.CosmicReader": [
             "cosmic-reader",
-            os.getenv("COSMIC_READER_EMPTY_PDF"),
+            cli_args.cosmic_reader_pdf,
         ],
         "com.system76.CosmicSettings": [
             "cosmic-settings",
@@ -175,22 +241,26 @@ def perform_gui_application_test() -> None:
 
 
 def main() -> None:
+    cli_args = parse_cli_args()
     logging.basicConfig(
         level=logging.INFO,
         format=f"%(asctime)sZ [%(levelname)s] [L:%(lineno)d] %(message)s",
         datefmt="%H:%M:%S",
         handlers=[
             logging.StreamHandler(),
-            logging.FileHandler(log_file_name, mode="w"),
+            logging.FileHandler(f"{cli_args.log_file_path}.log", mode="w"),
         ],
     )
     logging.Formatter.converter = time.gmtime
-    logging.info(f"Logging to '{log_file_name}'")
+    logging.info(f"Logging to '{cli_args.log_file_path}.log'")
 
-    wait_for_cosmic_notification_watcher()
-    perform_polkit_authentication_test()
-    perform_gui_application_test()
-    pathlib.Path(f"{log_file_path}.done").touch()
+    ydotool_daemon_socket_path, ydotool_daemon_process = start_ydotool_daemon(cli_args)
+    wait_for_cosmic_notification_watcher(cli_args)
+    perform_polkit_authentication_test(
+        cli_args, ydotool_daemon_socket_path, ydotool_daemon_process
+    )
+    perform_gui_application_test(cli_args)
+    pathlib.Path(f"{cli_args.log_file_path}.done").touch()
 
 
 if __name__ == "__main__":

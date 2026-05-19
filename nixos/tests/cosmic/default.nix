@@ -8,22 +8,9 @@
 }:
 
 let
-  emptyPDF = config.node.pkgs.stdenvNoCC.mkDerivation {
-    name = "empty-pdf";
-    dontUnpack = true;
-    nativeBuildInputs = [ config.node.pkgs.imagemagick ];
-    buildPhase = ''
-      magick xc:none -page Letter empty.pdf
-    '';
-    installPhase = ''
-      mkdir $out
-      mv empty.pdf $out/empty.pdf
-    '';
-  };
-  env_COSMIC_READER_EMPTY_PDF = "COSMIC_READER_EMPTY_PDF=${emptyPDF}/empty.pdf";
-  env_POLKIT_AGENT_HELPER_PATH = "POLKIT_AGENT_HELPER_PATH=${config.node.pkgs.polkit.out}/lib/polkit-1/polkit-agent-helper-1";
   user = config.nodes.machine.users.users.alice;
   root_user = config.nodes.machine.users.users.root;
+  root_user_password = "foobar";
   log_file_path = "/home/${user.name}/${testName}";
 in
 
@@ -54,11 +41,15 @@ in
     };
 
     users.users = {
-      alice.extraGroups = [ "systemd-journal" ];
+      alice.extraGroups = [
+        "uinput" # for ydotoold
+      ];
 
-      root.password = user.password;
+      root.password = root_user_password;
       root.hashedPasswordFile = lib.mkForce null;
     };
+
+    hardware.uinput.enable = true;
 
     environment.systemPackages = with config.node.pkgs; [
       # These two packages are used to check if a window was opened
@@ -75,7 +66,22 @@ in
           pkgs.makeDesktopItem {
             name = "cosmicTest";
             desktopName = "COSMIC NixOS VM test (${testName})";
-            exec = "env ${env_COSMIC_READER_EMPTY_PDF} ${env_POLKIT_AGENT_HELPER_PATH} ${pkgs.python3}/bin/python3 ${./test-script.py} ${log_file_path}";
+            exec =
+              let
+                emptyPDF = config.node.pkgs.stdenvNoCC.mkDerivation {
+                  name = "empty-pdf";
+                  dontUnpack = true;
+                  nativeBuildInputs = [ config.node.pkgs.imagemagick ];
+                  buildPhase = ''
+                    magick xc:none -page Letter empty.pdf
+                  '';
+                  installPhase = ''
+                    mkdir $out
+                    mv empty.pdf $out/empty.pdf
+                  '';
+                };
+              in
+              "${pkgs.python3}/bin/python3 ${./test-script.py} --cosmic-reader-pdf ${emptyPDF}/empty.pdf --log-file-path log_file_path --polkit-agent-helper-path ${config.node.pkgs.polkit.out}/lib/polkit-1/polkit-agent-helper-1 --root-user-password ${root_user_password} --ydotool-bin-path ${config.node.pkgs.ydotool}/bin";
           }
         );
       })
@@ -120,22 +126,13 @@ in
         ''
     )
     + ''
-          # The notification watcher is the last component to get
-          # initialized in the COSMIC session. Not fully deterministic
-          # but a good-enough heuristic.
-          machine.wait_until_succeeds("machinectl shell ${user.name}@ /run/current-system/sw/bin/busctl --user status com.system76.CosmicStatusNotifierWatcher", timeout=300)
 
       with subtest("xdg autostart support in cosmic"):
-          machine.wait_for_unit("app-cosmicTest@autostart.service", user="${user.name}", timeout=60)
+          machine.wait_for_unit("app-cosmicTest@autostart.service", user="${user.name}", timeout=180)
 
       exit_code = 0
       try:
-          machine.wait_for_file("${log_file_path}.pkexec_started", timeout=400)
-          machine.send_chars("${root_user.password}\n", delay=0.2)
-      except Exception:
-          exit_code = 1
-      try:
-          machine.wait_for_file("${log_file_path}.done", timeout=300)
+          machine.wait_for_file("${log_file_path}.done", timeout=700)
       except Exception:
           exit_code = 1
 
