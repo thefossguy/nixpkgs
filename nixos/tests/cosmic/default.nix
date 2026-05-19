@@ -159,6 +159,7 @@ in
       # `wait_for_file`s, make it extremely likely for the log file to
       # be present.
       machine.copy_from_machine("${log_file_path}.log")
+
       machine.shutdown()
 
       with open(machine.out_dir / "${testName}.log") as test_log_file:

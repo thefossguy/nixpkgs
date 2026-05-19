@@ -125,7 +125,7 @@ def perform_polkit_authentication_test(
                 # doesn't necessarily mean that the pop-up is rendered
                 # and ready to accept the password. So we sleep for a
                 # few seconds.
-                time.sleep(10)
+                time.sleep(20)
                 ydotool_process = subprocess.run(
                     [
                         "env",
