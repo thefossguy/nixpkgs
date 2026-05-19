@@ -141,7 +141,7 @@ def perform_gui_application_test() -> None:
         gui_app_bg_process_deadline = time.monotonic() + 30
         gui_app_is_running = False
 
-        while time.monotonic < gui_app_bg_process_deadline and not gui_app_is_running:
+        while time.monotonic() < gui_app_bg_process_deadline and not gui_app_is_running:
             lswt_process = subprocess.run(
                 [
                     "lswt",
