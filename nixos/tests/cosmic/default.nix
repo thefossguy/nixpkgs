@@ -35,7 +35,7 @@ in
 
     services.displayManager.autoLogin = lib.mkIf enableAutologin {
       enable = true;
-      user = "alice";
+      user = user.name;
     };
 
     users.users = {

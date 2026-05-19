@@ -153,7 +153,6 @@ def perform_polkit_authentication_test(
     if not encountered_polkit_authentication_popup:
         logging.error(f"Did not notice {pop_up_msg}")
 
-
     polkit_test_process_stdout = ""
     polkit_test_process_stderr = ""
     try:
