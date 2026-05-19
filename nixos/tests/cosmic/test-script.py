@@ -13,35 +13,31 @@ if log_file_path.endswith(".log"):
 log_file_name = f"{log_file_path}.log"
 
 
-def wait_for_orca() -> None:
+def wait_for_cosmic_notification_watcher() -> None:
     logging.info("=" * 80)
-    logging.info("Waiting for Orca (screen reader) to start")
+    logging.info("Waiting for COSMIC notification watcher start")
 
-    orca_deadline = time.monotonic() + 300
-    orca_test_passed = False
-    while time.monotonic() < orca_deadline:
-        pgrep_process = subprocess.run(
+    notification_watcher_wait_deadline = time.monotonic() + 360
+    notification_watcher_exists = False
+    while time.monotonic() < notification_watcher_wait_deadline:
+        busctl_process = subprocess.run(
             [
-                "pgrep",
-                "--uid",
-                str(os.getuid()),
-                "--full",
-                "orca",
+                "busctl", "--user", "status", "com.system76.CosmicStatusNotifierWatcher"
             ],
             check=False,
             stdout=subprocess.DEVNULL,
             stderr=subprocess.DEVNULL,
         )
-        if pgrep_process.returncode == 0:
-            orca_test_passed = True
+        if busctl_process.returncode == 0:
+            notification_watcher_exists = True
             break
         else:
             time.sleep(1)
-    orca_msg = "Waiting for the Orca screen reader"
-    if orca_test_passed:
-        logging.info(f"{orca_msg} passed")
+    notification_watcher_msg = "Waiting for the COSMIC notification watcher"
+    if notification_watcher_exists:
+        logging.info(f"{notification_watcher_msg} passed")
     else:
-        logging.error(f"{orca_msg} failed")
+        logging.error(f"{notification_watcher_msg} failed")
 
 
 def perform_polkit_authentication_test() -> None:
@@ -191,7 +187,7 @@ def main() -> None:
     logging.Formatter.converter = time.gmtime
     logging.info(f"Logging to '{log_file_name}'")
 
-    wait_for_orca()
+    wait_for_cosmic_notification_watcher()
     perform_polkit_authentication_test()
     perform_gui_application_test()
     pathlib.Path(f"{log_file_path}.done").touch()

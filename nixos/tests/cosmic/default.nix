@@ -120,6 +120,10 @@ in
         ''
     )
     + ''
+          # The notification watcher is the last component to get
+          # initialized in the COSMIC session. Not fully deterministic
+          # but a good-enough heuristic.
+          machine.wait_until_succeeds("machinectl shell ${user.name}@ /run/current-system/sw/bin/busctl --user status com.system76.CosmicStatusNotifierWatcher", timeout=300)
 
       with subtest("xdg autostart support in cosmic"):
           machine.wait_for_unit("app-cosmicTest@autostart.service", user="${user.name}", timeout=60)
