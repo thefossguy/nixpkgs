@@ -49,7 +49,9 @@ def start_ydotool_daemon(cli_args: argparse.Namespace) -> tuple[str, subprocess.
             "--socket-path",
             ydotool_daemon_socket_path,
             "--mouse-off",
-        ]
+        ],
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
     )
     return ydotool_daemon_socket_path, ydotool_daemon_process
 

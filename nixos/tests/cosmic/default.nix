@@ -81,7 +81,7 @@ in
                   '';
                 };
               in
-              "${pkgs.python3}/bin/python3 ${./test-script.py} --cosmic-reader-pdf ${emptyPDF}/empty.pdf --log-file-path log_file_path --polkit-agent-helper-path ${config.node.pkgs.polkit.out}/lib/polkit-1/polkit-agent-helper-1 --root-user-password ${root_user_password} --ydotool-bin-path ${config.node.pkgs.ydotool}/bin";
+              "${pkgs.python3}/bin/python3 ${./test-script.py} --cosmic-reader-pdf ${emptyPDF}/empty.pdf --log-file-path ${log_file_path} --polkit-agent-helper-path ${config.node.pkgs.polkit.out}/lib/polkit-1/polkit-agent-helper-1 --root-user-password ${root_user_password} --ydotool-bin-path ${config.node.pkgs.ydotool}/bin";
           }
         );
       })
