@@ -101,7 +101,7 @@ def perform_polkit_authentication_test(
     polkit_test_process = subprocess.Popen(
         polkit_test_command,
         stdout=subprocess.PIPE,
-        stderr=subprocess.DEVNULL,
+        stderr=subprocess.PIPE,
         text=True,
     )
 
