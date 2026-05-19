@@ -121,7 +121,11 @@ def perform_polkit_authentication_test(
             encountered_polkit_authentication_popup = True
             logging.info(f"Noticed {pop_up_msg}")
             if ydotool_daemon_process.poll() == None:
-                time.sleep(30)
+                # The polkit-agent-helper process exists, but that
+                # doesn't necessarily mean that the pop-up is rendered
+                # and ready to accept the password. So we sleep for a
+                # few seconds.
+                time.sleep(10)
                 ydotool_process = subprocess.run(
                     [
                         "env",
