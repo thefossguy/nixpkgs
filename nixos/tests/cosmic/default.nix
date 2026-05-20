@@ -10,6 +10,54 @@
 let
   user = config.nodes.machine.users.users.alice;
   log_file_path = "/home/${user.name}/${testName}";
+
+  emptyPDF = config.node.pkgs.stdenvNoCC.mkDerivation {
+    name = "empty-pdf";
+    dontUnpack = true;
+    nativeBuildInputs = [ config.node.pkgs.imagemagick ];
+    buildPhase = ''
+      magick xc:none -page Letter empty.pdf
+    '';
+    installPhase = ''
+      mkdir $out
+      mv empty.pdf $out/empty.pdf
+    '';
+  };
+  cosmicTestScript = config.node.pkgs.stdenvNoCC.mkDerivation {
+    name = "cosmicTestScript";
+    src = ./test-script.py;
+    dontUnpack = true;
+    buildInputs = [config.node.pkgs.python3Minimal];
+    installPhase = ''
+      cp $src $out
+      chmod +x $out
+    '';
+  };
+  cosmicTest = config.node.pkgs.stdenvNoCC.mkDerivation {
+    name = "cosmicTest";
+    dontUnpack = true;
+    installPhase = ''
+      cp ${config.node.pkgs.writeText "cosmicTest" ''
+        exec ${cosmicTestScript} \
+            --cosmic-reader-pdf ${emptyPDF}/empty.pdf \
+            --log-file-path ${log_file_path} \
+            --polkit-agent-helper-path ${config.node.pkgs.polkit.out}/lib/polkit-1/polkit-agent-helper-1 \
+            --root-user-password ${user.password} \
+            --ydotool-drv-store-path ${config.node.pkgs.ydotool} \
+            2>&1 | tee ${log_file_path}.log
+      ''} $out
+      chmod +x $out
+    '';
+  };
+  cosmicTestDesktop = config.node.pkgs.makeDesktopItem {
+    name = "cosmicTest";
+    desktopName = "COSMIC NixOS VM test (${testName})";
+    exec = cosmicTest;
+  };
+  cosmicTestAutostartItem = config.node.pkgs.makeAutostartItem {
+    name = "cosmicTest";
+    package = cosmicTestDesktop;
+  };
 in
 
 {
@@ -59,32 +107,7 @@ in
       jq
       lswt
 
-      (pkgs.makeAutostartItem {
-        name = "cosmicTest";
-        package = (
-          pkgs.makeDesktopItem {
-            name = "cosmicTest";
-            desktopName = "COSMIC NixOS VM test (${testName})";
-            exec =
-              let
-                emptyPDF = config.node.pkgs.stdenvNoCC.mkDerivation {
-                  name = "empty-pdf";
-                  dontUnpack = true;
-                  nativeBuildInputs = [ config.node.pkgs.imagemagick ];
-                  buildPhase = ''
-                    magick xc:none -page Letter empty.pdf
-                  '';
-                  installPhase = ''
-                    mkdir $out
-                    mv empty.pdf $out/empty.pdf
-                  '';
-                };
-              in
-              "${pkgs.python3}/bin/python3 ${./test-script.py} --cosmic-reader-pdf ${emptyPDF}/empty.pdf --log-file-path ${log_file_path} --polkit-agent-helper-path ${config.node.pkgs.polkit.out}/lib/polkit-1/polkit-agent-helper-1 --root-user-password ${user.password} --ydotool-bin-path ${config.node.pkgs.ydotool}/bin";
-          }
-        );
-      })
-
+      cosmicTestAutostartItem
     ];
 
     # So far, all COSMIC tests launch a few GUI applications. In doing
@@ -116,7 +139,7 @@ in
           from time import sleep
 
           machine.wait_for_unit("graphical.target", timeout=120)
-          machine.wait_until_succeeds("pgrep --uid ${toString config.nodes.machine.users.users.cosmic-greeter.name} --full cosmic-greeter", timeout=30)
+          machine.wait_until_succeeds("pgrep --uid ${config.nodes.machine.users.users.cosmic-greeter.name} --full cosmic-greeter", timeout=30)
           # Sleep for 10 seconds for ensuring that `greetd` loads the
           # password prompt for the login screen properly.
           sleep(10)
@@ -167,6 +190,7 @@ in
           print(contents)
           if any("Z [ERROR] [L:" in line for line in contents.splitlines()):
               exit_code = 1
+
       sys.exit(exit_code)
     '';
 }

@@ -31,10 +31,10 @@ def parse_cli_args() -> argparse.Namespace:
         "--root-user-password", required=True, type=str, help="The root user's password"
     )
     parser.add_argument(
-        "--ydotool-bin-path",
+        "--ydotool-drv-store-path",
         required=True,
         type=str,
-        help="The path to the ydotool derivation's bin directory (`${pkgs.ydotool}/bin`)",
+        help="The path to the ydotool derivation's store path (`${pkgs.ydotool}`)",
     )
     args = parser.parse_args()
     return args
@@ -45,7 +45,7 @@ def start_ydotool_daemon(cli_args: argparse.Namespace) -> tuple[str, subprocess.
     ydotool_daemon_socket_path = f"{xdg_runtime_dir}/.ydotool_socket"
     ydotool_daemon_process = subprocess.Popen(
         [
-            f"{cli_args.ydotool_bin_path}/ydotoold",
+            f"{cli_args.ydotool_drv_store_path}/bin/ydotoold",
             "--socket-path",
             ydotool_daemon_socket_path,
             "--mouse-off",
@@ -130,7 +130,7 @@ def perform_polkit_authentication_test(
                     [
                         "env",
                         f"YDOTOOL_SOCKET={ydotool_daemon_socket_path}",
-                        f"{cli_args.ydotool_bin_path}/ydotool",
+                        f"{cli_args.ydotool_drv_store_path}/bin/ydotool",
                         "type",
                         "--key-delay=500",
                         f"{cli_args.root_user_password}\n",
@@ -258,10 +258,6 @@ def main() -> None:
         level=logging.INFO,
         format=f"%(asctime)sZ [%(levelname)s] [L:%(lineno)d] %(message)s",
         datefmt="%H:%M:%S",
-        handlers=[
-            logging.StreamHandler(),
-            logging.FileHandler(f"{cli_args.log_file_path}.log", mode="w"),
-        ],
     )
     logging.Formatter.converter = time.gmtime
     logging.info(f"Logging to '{cli_args.log_file_path}.log'")
