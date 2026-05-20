@@ -23,7 +23,7 @@ let
       mv empty.pdf $out/empty.pdf
     '';
   };
-  cosmicTest = config.node.pkgs.writeShellScript "cosmicTest" ''
+  cosmicTest = config.node.pkgs.writeShellScriptBin "cosmicTest" ''
     exec ${config.node.pkgs.python3Minimal}/bin/python3 ${./test-script.py} \
         --cosmic-reader-pdf ${emptyPDF}/empty.pdf \
         --log-file-path ${log_file_path} \
@@ -34,7 +34,7 @@ let
   cosmicTestDesktop = config.node.pkgs.makeDesktopItem {
     name = "cosmicTest";
     desktopName = "COSMIC NixOS VM test (${testName})";
-    exec = cosmicTest;
+    exec = "${cosmicTest}/bin/cosmicTest";
   };
   cosmicTestAutostartItem = config.node.pkgs.makeAutostartItem {
     name = "cosmicTest";
