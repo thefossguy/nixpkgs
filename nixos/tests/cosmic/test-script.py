@@ -258,7 +258,10 @@ def main() -> None:
         level=logging.INFO,
         format=f"%(asctime)sZ [%(levelname)s] [L:%(lineno)d] %(message)s",
         datefmt="%H:%M:%S",
-        handlers=[ logging.StreamHandler(), logging.FileHandler(f"{cli_args.log_file_path}.log", mode="w"),   ],
+        handlers=[
+            logging.StreamHandler(),
+            logging.FileHandler(f"{cli_args.log_file_path}.log", mode="w"),
+        ],
     )
     logging.Formatter.converter = time.gmtime
     logging.info(f"Logging to '{cli_args.log_file_path}.log'")
