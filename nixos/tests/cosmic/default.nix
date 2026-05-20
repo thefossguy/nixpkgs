@@ -23,6 +23,8 @@ let
       mv empty.pdf $out/empty.pdf
     '';
   };
+  # Use `writeShellScriptBin` instead of `writeShellScript` so that the
+  # process name in the journald log appears as 'cosmicTest[$pid]'
   cosmicTest = config.node.pkgs.writeShellScriptBin "cosmicTest" ''
     exec ${config.node.pkgs.python3Minimal}/bin/python3 ${./test-script.py} \
         --cosmic-reader-pdf ${emptyPDF}/empty.pdf \
