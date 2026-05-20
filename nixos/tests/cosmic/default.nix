@@ -43,8 +43,7 @@ let
             --log-file-path ${log_file_path} \
             --polkit-agent-helper-path ${config.node.pkgs.polkit.out}/lib/polkit-1/polkit-agent-helper-1 \
             --root-user-password ${user.password} \
-            --ydotool-drv-store-path ${config.node.pkgs.ydotool} \
-            2>&1 | tee ${log_file_path}.log
+            --ydotool-drv-store-path ${config.node.pkgs.ydotool}
       ''} $out
       chmod +x $out
     '';
