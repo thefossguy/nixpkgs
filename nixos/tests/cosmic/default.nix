@@ -23,31 +23,14 @@ let
       mv empty.pdf $out/empty.pdf
     '';
   };
-  cosmicTestScript = config.node.pkgs.stdenvNoCC.mkDerivation {
-    name = "cosmicTestScript";
-    src = ./test-script.py;
-    dontUnpack = true;
-    buildInputs = [config.node.pkgs.python3Minimal];
-    installPhase = ''
-      cp $src $out
-      chmod +x $out
-    '';
-  };
-  cosmicTest = config.node.pkgs.stdenvNoCC.mkDerivation {
-    name = "cosmicTest";
-    dontUnpack = true;
-    installPhase = ''
-      cp ${config.node.pkgs.writeText "cosmicTest" ''
-        exec ${cosmicTestScript} \
-            --cosmic-reader-pdf ${emptyPDF}/empty.pdf \
-            --log-file-path ${log_file_path} \
-            --polkit-agent-helper-path ${config.node.pkgs.polkit.out}/lib/polkit-1/polkit-agent-helper-1 \
-            --root-user-password ${user.password} \
-            --ydotool-drv-store-path ${config.node.pkgs.ydotool}
-      ''} $out
-      chmod +x $out
-    '';
-  };
+  cosmicTest = config.node.pkgs.writeShellScript "cosmicTest" ''
+    exec ${config.node.pkgs.python3Minimal}/bin/python3 ${./test-script.py} \
+        --cosmic-reader-pdf ${emptyPDF}/empty.pdf \
+        --log-file-path ${log_file_path} \
+        --polkit-agent-helper-path ${config.node.pkgs.polkit.out}/lib/polkit-1/polkit-agent-helper-1 \
+        --root-user-password ${user.password} \
+        --ydotool-drv-store-path ${config.node.pkgs.ydotool}
+  '';
   cosmicTestDesktop = config.node.pkgs.makeDesktopItem {
     name = "cosmicTest";
     desktopName = "COSMIC NixOS VM test (${testName})";
