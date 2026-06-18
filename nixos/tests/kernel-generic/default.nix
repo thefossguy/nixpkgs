@@ -77,12 +77,32 @@ let
         '';
       }
     ) args);
-  kernels = patchedPkgs.linuxKernel.vanillaPackages // {
-    inherit (patchedPkgs.linuxKernel.packages)
 
-      linux_testing
-      ;
+  mk64kKernel =
+    kernelPackage:
+    patchedPkgs.linuxKernel.packagesFor (
+      kernelPackage.override {
+        structuredExtraConfig = {
+          ARM64_64K_PAGES = kernel.yes;
+        };
+      }
+    );
+
+  kernels64k = attrsets.optionalAttrs (pkgs.stdenv.hostPlatform.system == "aarch64-linux") {
+    linux_default_64k = mk64kKernel patchedPkgs.linux;
+    linux_latest_64k = mk64kKernel patchedPkgs.linux_latest;
+    linux_testing_64k = mk64kKernel patchedPkgs.linux_testing;
   };
+
+  kernels =
+    patchedPkgs.linuxKernel.vanillaPackages
+    // {
+      inherit (patchedPkgs.linuxKernel.packages)
+
+        linux_testing
+        ;
+    }
+    // kernels64k;
 
 in
 mapAttrs (_: lP: testsForLinuxPackages lP) kernels
